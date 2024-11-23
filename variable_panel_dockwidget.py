@@ -27,7 +27,7 @@ from qgis.gui import QgsVariableEditorWidget
 from qgis.core import QgsExpressionContextUtils, QgsExpressionContext, QgsProject
 from qgis.utils import iface
 from qgis.PyQt.QtWidgets import QVBoxLayout, QPushButton
-
+from qgis.PyQt.QtCore import QCoreApplication
 
 def tr(string):
     return QCoreApplication.translate('@default', string)

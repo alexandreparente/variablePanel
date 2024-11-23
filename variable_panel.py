@@ -22,12 +22,10 @@
  ***************************************************************************/
 """
 from qgis.PyQt.QtCore import QTimer, QSettings, QTranslator, QLocale ,QCoreApplication, Qt
-
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QDockWidget
-
-from .resources import *
 from .variable_panel_dockwidget import VariablePanelDockWidget
+from .resources import *
 
 import os.path
 
