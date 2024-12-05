@@ -21,12 +21,11 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qgis.PyQt.QtCore import QTimer, QSettings, QTranslator, QCoreApplication, Qt
+from qgis.PyQt.QtCore import QTimer, QSettings, QTranslator, QLocale ,QCoreApplication, Qt
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QDockWidget
-
-from .resources import *
+from qgis.PyQt.QtWidgets import QAction
 from .variable_panel_dockwidget import VariablePanelDockWidget
+from .resources import *
 
 import os.path
 
@@ -47,12 +46,12 @@ class VariablePanel:
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
 
-        # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
-        locale_path = os.path.join(
-            self.plugin_dir,
-            'i18n',
-            'VariablePanel_{}.qm'.format(locale))
+        # Gets the locale configured in the system.
+        settings = QSettings()
+        locale = settings.value("locale/userLocale", QLocale.system().name())
+
+        # Initialize locale
+        locale_path = os.path.join(self.plugin_dir, 'i18n', 'VariablePanel_{}.qm'.format(locale))
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -152,7 +151,7 @@ class VariablePanel:
 
     def initGui(self):
         #Create the menu entries and toolbar icons inside the QGIS GUI.
-        icon_path = ':/plugins/variable_panel/icon.png'
+        icon_path = ':/plugins/variable_panel/mIconExpression.svg'
         self.add_action(
             icon_path,
             text=self.tr(f'Variable Panel'),
@@ -172,9 +171,10 @@ class VariablePanel:
         if not self.pluginIsActive:
             # Activates the plugin and creates the dockwidget if necessary
             self.pluginIsActive = True
+            print(f"ativei o plugin")
 
-            if self.dockwidget is None:
-                self.dockwidget = VariablePanelDockWidget()
+            #if self.dockwidget is None:
+            self.dockwidget = VariablePanelDockWidget()
 
             # Adds the dockwidget to the interface
             self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget)
@@ -182,18 +182,23 @@ class VariablePanel:
             # Pass an empty list for tabification as no other dockwidgets are targeted
             self.iface.addTabifiedDockWidget(Qt.RightDockWidgetArea, self.dockwidget, [], True)
 
-            self.dockwidget.show()
+            self.dockwidget.setToggleVisibilityAction(self.actions[0])
 
             # Connects the signal to monitor visibility changes
-            self.dockwidget.visibilityChanged.connect(self.resetPluginStateOnDockClose)
+            self.dockwidget.closed.connect(self.onDockWidgetClosed)
+
+            self.dockwidget.show()
+
+            self.dockwidget.raise_()
 
         else:
             self.dockwidget.close()
 
-    def resetPluginStateOnDockClose(self):
-        if not self.dockwidget.isVisible():
-            self.actions[0].setChecked(False)
-            self.dockwidget.visibilityChanged.disconnect(self.resetPluginStateOnDockClose)
-            self.pluginIsActive = False
-            # Delays the redefinition of `self.dockwidget` to avoid conflicts with pending Qt events
-            QTimer.singleShot(0, lambda: setattr(self, 'dockwidget', None))
+    def onDockWidgetClosed(self):
+        self.pluginIsActive = False
+
+        self.dockwidget.closed.disconnect(self.onDockWidgetClosed)
+
+        # Delays the redefinition of `self.dockwidget` to avoid conflicts with pending Qt events
+        QTimer.singleShot(0, lambda: setattr(self, 'dockwidget', None))
+

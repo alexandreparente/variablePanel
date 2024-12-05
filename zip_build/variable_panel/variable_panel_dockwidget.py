@@ -23,22 +23,21 @@
 """
 
 from qgis.PyQt import QtWidgets
-from qgis.gui import QgsVariableEditorWidget
+from qgis.gui import QgsDockWidget, QgsVariableEditorWidget
 from qgis.core import QgsExpressionContextUtils, QgsExpressionContext, QgsProject
 from qgis.utils import iface
+from qgis.PyQt.QtCore import QCoreApplication
 from qgis.PyQt.QtWidgets import QVBoxLayout, QPushButton
-
 
 def tr(string):
     return QCoreApplication.translate('@default', string)
 
-class VariablePanelDockWidget(QtWidgets.QDockWidget):
+#class VariablePanelDockWidget(QtWidgets.QDockWidget):
+class VariablePanelDockWidget(QgsDockWidget):
 
     def __init__(self, parent=None):
         """Constructor."""
         super(VariablePanelDockWidget, self).__init__(parent)
-
-        self.previousVars = {}  # Store the previous state of the variables
 
         # Set the panel title
         self.setWindowTitle(self.tr(f"Variable Panel"))
@@ -86,7 +85,7 @@ class VariablePanelDockWidget(QtWidgets.QDockWidget):
 
     def closeDockWidget(self):
         """Closes and removes the DockWidget."""
-        self.close()  # Close the DockWidget
+        self.close()
 
     def applyChanges(self):
         """Applies the changes made to the variables."""
@@ -101,7 +100,7 @@ class VariablePanelDockWidget(QtWidgets.QDockWidget):
         expressionContext.appendScope(
             QgsExpressionContextUtils.projectScope(QgsProject.instance()))
         self.updateProjectVariables(expressionContext)
-        self.close()  # Close the DockWidget
+        self.close()
 
     def updateProjectVariables(self, expressionContext):
         """Reads the variables from the active scope and updates all project variables."""
@@ -110,7 +109,7 @@ class VariablePanelDockWidget(QtWidgets.QDockWidget):
         current_variables = self.variable_editor_widget.variablesInActiveScope()
 
         # Convert the variables to a dictionary for setProjectVariables
-        variablesDict = {}  # Create an empty dictionary
+        variablesDict = {}
         # Iterate over the variables in the active scope
         for var_name, var_value in current_variables.items():
             # Add each variable and its value to the dictionary
