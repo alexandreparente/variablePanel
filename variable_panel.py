@@ -182,13 +182,15 @@ class VariablePanel:
             # Pass an empty list for tabification as no other dockwidgets are targeted
             self.iface.addTabifiedDockWidget(Qt.RightDockWidgetArea, self.dockwidget, [], True)
 
+            # Synchronizes the dock with the toolbar button
             self.dockwidget.setToggleVisibilityAction(self.actions[0])
 
-            # Connects the signal to monitor visibility changes
+            # Connects the signal to monitor when the dock closes
             self.dockwidget.closed.connect(self.onDockWidgetClosed)
 
             self.dockwidget.show()
 
+            #Ensure that the dock widget moves to the top.
             self.dockwidget.raise_()
 
         else:
