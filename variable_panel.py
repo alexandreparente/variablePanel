@@ -217,4 +217,3 @@ class VariablePanel:
 
     def onDockLocationChanged(self,area):
         self.sideDockWidgetArea = area
-
