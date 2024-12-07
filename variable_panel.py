@@ -47,8 +47,8 @@ class VariablePanel:
         self.plugin_dir = os.path.dirname(__file__)
 
         # Gets the locale configured in the system.
-        settings = QSettings()
-        locale = settings.value("locale/userLocale", QLocale.system().name())
+        self.settings = QSettings()
+        locale = self.settings.value("locale/userLocale", QLocale.system().name())
 
         # Initialize locale
         locale_path = os.path.join(self.plugin_dir, 'i18n', 'VariablePanel_{}.qm'.format(locale))
@@ -65,8 +65,8 @@ class VariablePanel:
         self.toolbar = self.iface.addToolBar('VariablePanel')
         self.toolbar.setObjectName('VariablePanel')
 
-        self.pluginIsActive = False
         self.dockwidget = None
+        self.sideDockWidgetArea = Qt.RightDockWidgetArea
 
     def tr(self,string):
         return QCoreApplication.translate('VariablePanel', string)
@@ -155,8 +155,12 @@ class VariablePanel:
         self.add_action(
             icon_path,
             text=self.tr(f'Variable Panel'),
-            callback=self.run,
+            callback=self.toggleDockWidgetVisibility,
             parent=self.iface.mainWindow())
+        print(f"0")
+
+        self.initDockWidget(self.sideDockWidgetArea)
+        self.dockwidget.hide()
 
     def unload(self):
         #Removes the plugin menu item and icon from QGIS GUI.
@@ -166,41 +170,51 @@ class VariablePanel:
             # remove the toolbar
         del self.toolbar
 
-    def run(self):
-        #Run method that loads and starts the plugin
-        if not self.pluginIsActive:
-            # Activates the plugin and creates the dockwidget if necessary
-            self.pluginIsActive = True
-            print(f"ativei o plugin")
-
-            #if self.dockwidget is None:
-            self.dockwidget = VariablePanelDockWidget()
-
-            # Adds the dockwidget to the interface
-            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget)
-
-            # Pass an empty list for tabification as no other dockwidgets are targeted
-            self.iface.addTabifiedDockWidget(Qt.RightDockWidgetArea, self.dockwidget, [], True)
-
-            # Synchronizes the dock with the toolbar button
-            self.dockwidget.setToggleVisibilityAction(self.actions[0])
-
-            # Connects the signal to monitor when the dock closes
-            self.dockwidget.closed.connect(self.onDockWidgetClosed)
-
-            self.dockwidget.show()
-
-            #Ensure that the dock widget moves to the top.
-            self.dockwidget.raise_()
-
+    def toggleDockWidgetVisibility(self):
+        if self.dockwidget is None:
+             self.initDockWidget(self.sideDockWidgetArea)
+             # Ensure that the dock widget moves to the top.
+             self.dockwidget.show()
+             self.dockwidget.raise_()
+             print(f"1")
         else:
-            self.dockwidget.close()
+            if self.dockwidget.isVisible():
+                self.dockwidget.show()
+                # Ensure that the dock widget moves to the top.
+                self.dockwidget.raise_()
+                print(f"2")
+            else:
+                self.dockwidget.close()
+                print(f"3")
+
+    def initDockWidget(self, sideDockWidgetArea):
+
+        self.dockwidget = VariablePanelDockWidget()
+
+        self.dockwidget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+
+        self.dockwidget.setFloating(False)
+
+        # Adds the dockwidget to the interface
+        self.iface.addDockWidget(self.sideDockWidgetArea, self.dockwidget)
+
+        # Pass an empty list for tabification as no other dockwidgets are targeted
+        self.iface.addTabifiedDockWidget(self.sideDockWidgetArea, self.dockwidget, [], True)
+
+        # Synchronizes the dock with the toolbar button
+        self.dockwidget.setToggleVisibilityAction(self.actions[0])
+
+        # Connects the signal to monitor when the dock closes
+        self.dockwidget.closed.connect(self.onDockWidgetClosed)
+
+        self.dockwidget.dockLocationChanged.connect(self.onDockLocationChanged)
 
     def onDockWidgetClosed(self):
-        self.pluginIsActive = False
 
         self.dockwidget.closed.disconnect(self.onDockWidgetClosed)
-
         # Delays the redefinition of `self.dockwidget` to avoid conflicts with pending Qt events
         QTimer.singleShot(0, lambda: setattr(self, 'dockwidget', None))
+
+    def onDockLocationChanged(self,area):
+        self.sideDockWidgetArea = area
 
