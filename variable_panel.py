@@ -66,6 +66,7 @@ class VariablePanel:
         self.toolbar.setObjectName('VariablePanel')
 
         self.dockwidget = None
+
         self.sideDockWidgetArea = Qt.RightDockWidgetArea
 
     def tr(self,string):
@@ -128,9 +129,6 @@ class VariablePanel:
         action.triggered.connect(callback)
         action.setEnabled(enabled_flag)
 
-        #Makes the button checkable
-        action.setCheckable(checkable)
-
         if status_tip is not None:
             action.setStatusTip(status_tip)
 
@@ -141,79 +139,89 @@ class VariablePanel:
             self.toolbar.addAction(action)
 
         if add_to_menu:
-            self.iface.addPluginToMenu(
-                self.menu,
-                action)
-
+            self.iface.addPluginToMenu(self.menu, action)
         self.actions.append(action)
+
+        # Makes the button checkable
+        action.setCheckable(checkable)
 
         return action
 
+    # Initializes the GUI elements, including menu entries and toolbar icons, within the QGIS interface.
     def initGui(self):
-        #Create the menu entries and toolbar icons inside the QGIS GUI.
         icon_path = ':/plugins/variable_panel/mIconExpression.svg'
+        # Adds an action to QGIS with an icon, text label, and callback function.
         self.add_action(
             icon_path,
             text=self.tr(f'Variable Panel'),
             callback=self.toggleDockWidgetVisibility,
             parent=self.iface.mainWindow())
-        print(f"0")
 
+        # Initializes the dock widget in the specified side dock area.
         self.initDockWidget(self.sideDockWidgetArea)
+        # Hides the dock widget initially.
         self.dockwidget.hide()
 
-    def unload(self):
-        #Removes the plugin menu item and icon from QGIS GUI.
-        for action in self.actions:
-            self.iface.removePluginMenu(self.tr(f'&Variable Panel'),action)
-            self.iface.removeToolBarIcon(action)
-            # remove the toolbar
-        del self.toolbar
-
+    # Toggles the visibility of the dock widget when the toolbar button is clicked.
     def toggleDockWidgetVisibility(self):
         if self.dockwidget is None:
-             self.initDockWidget(self.sideDockWidgetArea)
-             # Ensure that the dock widget moves to the top.
-             self.dockwidget.show()
-             self.dockwidget.raise_()
-             print(f"1")
+            # Initializes the dock widget after it is closed
+            self.initDockWidget(self.sideDockWidgetArea)
+            # Makes the dock widget visible and brings it to the front.
+            self.dockwidget.show()
+            # Ensures that the dock is shown on top
+            self.dockwidget.raise_()
         else:
+            # Used to show the dock when the plugin is restored on QGIS startup
             if self.dockwidget.isVisible():
                 self.dockwidget.show()
-                # Ensure that the dock widget moves to the top.
                 self.dockwidget.raise_()
-                print(f"2")
             else:
+                # Closes the dock widget if it is currently visible.
                 self.dockwidget.close()
-                print(f"3")
 
+    # Initializes the dock widget and its properties.
     def initDockWidget(self, sideDockWidgetArea):
-
+        # Creates a new instance of the dock widget.
         self.dockwidget = VariablePanelDockWidget()
 
+        # Allows the dock widget to be positioned on the left or right side of the interface.
         self.dockwidget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
 
+        # Prevents the dock widget from being set as floating.
         self.dockwidget.setFloating(False)
 
-        # Adds the dockwidget to the interface
+        # Adds the dock widget to the QGIS interface in the specified area.
         self.iface.addDockWidget(self.sideDockWidgetArea, self.dockwidget)
 
-        # Pass an empty list for tabification as no other dockwidgets are targeted
+        # Tabifies the dock widget, but no other dock widgets are targeted.
         self.iface.addTabifiedDockWidget(self.sideDockWidgetArea, self.dockwidget, [], True)
 
-        # Synchronizes the dock with the toolbar button
+        # Links the dock widget's visibility toggle action with the toolbar button.
         self.dockwidget.setToggleVisibilityAction(self.actions[0])
 
-        # Connects the signal to monitor when the dock closes
+        # Connects the signal to handle the closing of the dock widget.
         self.dockwidget.closed.connect(self.onDockWidgetClosed)
 
+        # Connects the signal to track changes in the dock widget's location.
         self.dockwidget.dockLocationChanged.connect(self.onDockLocationChanged)
 
+    # Handles actions to perform when the dock widget is closed.
     def onDockWidgetClosed(self):
-
+        # Disconnects the signal to avoid redundant calls.
         self.dockwidget.closed.disconnect(self.onDockWidgetClosed)
-        # Delays the redefinition of `self.dockwidget` to avoid conflicts with pending Qt events
+        # Delays resetting the dock widget reference to avoid conflicts with Qt event handling.
         QTimer.singleShot(0, lambda: setattr(self, 'dockwidget', None))
 
-    def onDockLocationChanged(self,area):
+    # Updates the stored dock widget location when its position changes.
+    def onDockLocationChanged(self, area):
         self.sideDockWidgetArea = area
+
+    # Unloads the plugin by removing its GUI elements from QGIS.
+    def unload(self):
+        # Removes each action from the QGIS menu and toolbar.
+        for action in self.actions:
+            self.iface.removePluginMenu(self.tr(f'&Variable Panel'), action)
+            self.iface.removeToolBarIcon(action)
+        # Deletes the toolbar reference to clean up resources.
+        del self.toolbar
