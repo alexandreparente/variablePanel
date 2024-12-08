@@ -60,7 +60,7 @@ class VariablePanel:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(f'&Variable Panel')
+        self.menu = self.tr(f'&Variables Panel')
         # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar('VariablePanel')
         self.toolbar.setObjectName('VariablePanel')
@@ -153,7 +153,7 @@ class VariablePanel:
         # Adds an action to QGIS with an icon, text label, and callback function.
         self.add_action(
             icon_path,
-            text=self.tr(f'Variable Panel'),
+            text=self.tr(f'Variables Panel'),
             callback=self.toggleDockWidgetVisibility,
             parent=self.iface.mainWindow())
 
@@ -221,7 +221,7 @@ class VariablePanel:
     def unload(self):
         # Removes each action from the QGIS menu and toolbar.
         for action in self.actions:
-            self.iface.removePluginMenu(self.tr(f'&Variable Panel'), action)
+            self.iface.removePluginMenu(self.tr(f'&Variables Panel'), action)
             self.iface.removeToolBarIcon(action)
         # Deletes the toolbar reference to clean up resources.
         del self.toolbar

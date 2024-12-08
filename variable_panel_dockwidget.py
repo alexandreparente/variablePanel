@@ -40,7 +40,7 @@ class VariablePanelDockWidget(QgsDockWidget):
         super(VariablePanelDockWidget, self).__init__(parent)
 
         # Set the panel title
-        self.setWindowTitle(self.tr(f"Variable Panel"))
+        self.setWindowTitle(self.tr(f"Variables Panel"))
         self.setObjectName("VariablePanelDockWidget")
 
         # Create and configure the variable editor widget

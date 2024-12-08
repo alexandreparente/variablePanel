@@ -5,13 +5,13 @@
     <name>VariablePanel</name>
     <message>
         <location filename="../variable_panel.py" line="224"/>
-        <source>&amp;Variable Panel</source>
-        <translation>&amp;Variable Panel</translation>
+        <source>&amp;Variables Panel</source>
+        <translation>&amp;Variables Panel</translation>
     </message>
     <message>
         <location filename="../variable_panel.py" line="154"/>
-        <source>Variable Panel</source>
-        <translation>Variable Panel</translation>
+        <source>Variables Panel</source>
+        <translation>Variables Panel</translation>
     </message>
 </context>
 <context>
@@ -33,8 +33,8 @@
     </message>
     <message>
         <location filename="../variable_panel_dockwidget.py" line="43"/>
-        <source>Variable Panel</source>
-        <translation>Variable Panel</translation>
+        <source>Variables Panel</source>
+        <translation>Variables Panel</translation>
     </message>
 </context>
 </TS>
