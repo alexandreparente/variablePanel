@@ -136,4 +136,3 @@ class VariablePanelDockWidget(QgsDockWidget):
         self.variable_editor_widget.setContext(expressionContext)  # Set the context in the variable editor
         self.variable_editor_widget.reloadContext()  # Reload the context in the variable editor
         self.variable_editor_widget.setEditableScopeIndex(0)  # Set the first scope as editable
-

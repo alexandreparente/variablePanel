@@ -12,8 +12,8 @@ email=alexandre.parente@gmail.com
 
 about=This plugin compiles functions for formatting text, files, and editing images used in the preparation of technical reports.
 
-tracker=http://bugs
-repository=http://repo
+tracker=https://github.com/alexandreparente/variablePanel/issues
+repository=https://github.com/alexandreparente/variablePanel
 # End of mandatory metadata
 
 # Recommended items:
@@ -25,9 +25,10 @@ hasProcessingProvider=yes
 # Tags are comma separated with spaces allowed
 tags=python
 
-homepage=http://homepage
-category=Analysis
-icon=icon.png
+homepage=https://github.com/alexandreparente/variablePanel
+
+icon=mIconExpression.svg
+
 # experimental flag
 experimental=False
 
@@ -40,7 +41,7 @@ deprecated=False
 # plugin_dependencies=
 
 Category of the plugin: Raster, Vector, Database or Web
-# category=
+category=Utilities
 
 # If the plugin can run on QGIS Server.
 server=False
