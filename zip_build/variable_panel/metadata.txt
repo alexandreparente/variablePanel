@@ -5,12 +5,12 @@
 [general]
 name=variablePanel
 qgisMinimumVersion=3.34
-description=This plugin compiles tools used by EMI-PB
+description= Displays project variables in a dedicated panel.
 version=0.1
 author=Alexandre Parente Lima
 email=alexandre.parente@gmail.com
 
-about=This plugin compiles functions for formatting text, files, and editing images used in the preparation of technical reports.
+about= This plugin plugin displays project variables in a dedicated panel, making it easy to access, view, and edit them.
 
 tracker=https://github.com/alexandreparente/variablePanel/issues
 repository=https://github.com/alexandreparente/variablePanel
@@ -23,7 +23,7 @@ hasProcessingProvider=yes
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=python
+tags= variables, project, panel, dock
 
 homepage=https://github.com/alexandreparente/variablePanel
 
