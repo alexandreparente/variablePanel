@@ -7,7 +7,10 @@ The **VariablePanel** plugin for QGIS displays project variables in a dedicated 
 - Visualize all variables available within the project scope.  
 - Edit, add, remove, or modify variables directly.
 
----
+
+## Screenshot
+![alt text](https://github.com/alexandreparente/variablePanel/blob/main/screenshot/Captura%20de%20tela%20de%202024-12-08%2013-07-13.png)
+
 
 ## Installation
 
@@ -15,13 +18,9 @@ The **VariablePanel** plugin for QGIS displays project variables in a dedicated 
 2. Use the **Plugin Manager** in QGIS to install the plugin from the ZIP file.  
 3. Activate the plugin by navigating to the **Plugins** menu and checking the **emiTools** option.
 
----
-
 ## Usage
 
 After installation, the **VariablePanel** tools will be accessible in the **Plugins menu** and the **toolbar**, under the name **Variable Panel**.
-
----
 
 ## Requirements
 
