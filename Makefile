@@ -46,8 +46,6 @@ PY_FILES = \
 	__init__.py \
 	variable_panel.py variable_panel_dockwidget.py
 
-UI_FILES = variable_panel_dockwidget_base.ui
-
 EXTRAS = metadata.txt icon.png
 
 EXTRA_DIRS =
