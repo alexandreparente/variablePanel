@@ -1,6 +1,6 @@
-# Plugin VariablePanel
+# Plugin Variable Panel
 
-The **VariablePanel** plugin for QGIS displays project variables in a dedicated panel, making it easy to access, view, and edit them.
+The **Variable Panel** plugin for QGIS displays project variables in a dedicated panel, making it easy to access, view, and edit them.
 
 ## Features
 
@@ -20,7 +20,7 @@ The **VariablePanel** plugin for QGIS displays project variables in a dedicated 
 
 ## Usage
 
-After installation, the **VariablePanel** tools will be accessible in the **Plugins menu** and the **toolbar**, under the name **Variable Panel**.
+After installation, the **Variable Panel** tools will be accessible in the **Plugins menu** and the **toolbar**, under the name **Variable Panel**.
 
 ## Requirements
 
