@@ -1,12 +1,11 @@
 # This file contains metadata for your plugin.
-
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
 name=Variables Panel
 qgisMinimumVersion=3.34
 description= Displays project variables in a dedicated panel.
-version=0.1
+version=0.2
 author=Alexandre Parente Lima
 email=alexandre.parente@gmail.com
 
@@ -20,7 +19,9 @@ repository=https://github.com/alexandreparente/variablePanel
 
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
-# changelog=
+ changelog=
+    0.2 - Minor fix
+    0.1 - initial release
 
 # Tags are comma separated with spaces allowed
 tags= variables, project, panel, dock
@@ -30,7 +31,7 @@ homepage=https://github.com/alexandreparente/variablePanel
 icon=mIconExpression.svg
 
 # experimental flag
-experimental=True
+experimental=False
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
