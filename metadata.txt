@@ -5,7 +5,7 @@
 name=Variables Panel
 qgisMinimumVersion=3.34
 description= Displays project variables in a dedicated panel.
-version=0.2
+version=0.3
 author=Alexandre Parente Lima
 email=alexandre.parente@gmail.com
 
@@ -20,6 +20,7 @@ repository=https://github.com/alexandreparente/variablePanel
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
  changelog=
+    0.3 - Updates the panel when project variables are changed
     0.2 - Minor fix
     0.1 - initial release
 
