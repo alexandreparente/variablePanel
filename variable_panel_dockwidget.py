@@ -47,7 +47,7 @@ class VariablePanelDockWidget(QgsDockWidget):
         self.variable_editor_widget = QgsVariableEditorWidget()  # Create the variable editor widget
 
         #Create and configure Context
-        self.createContext()
+        self.initializeVariableEditorContext()
 
         # Configure the main layout
         layout = QVBoxLayout()  # Create a vertical layout
@@ -73,35 +73,39 @@ class VariablePanelDockWidget(QgsDockWidget):
         self.setWidget(container)  # Set the widget of the panel
 
         # Connect the Cancel button to the close function
-        self.apply_button.clicked.connect(self.applyChanges)
-        self.cancel_button.clicked.connect(self.closeDockWidget)
-        self.ok_button.clicked.connect(self.applyAndClose)
+        self.apply_button.clicked.connect(self.updateProjectVariables)
+        self.cancel_button.clicked.connect(self.close)
+        self.ok_button.clicked.connect(self.applyChangesAndClose)
 
         # Listen for changes in custom variables and metadata
         project = QgsProject.instance()  # Get the current QgsProject instance
-        project.customVariablesChanged.connect(self.createContext)
-        project.metadataChanged.connect(self.createContext)
+        project.customVariablesChanged.connect(self.initializeVariableEditorContext)
+        project.metadataChanged.connect(self.initializeVariableEditorContext)
 
-    def closeDockWidget(self):
-        """Closes and removes the DockWidget."""
-        self.close()
+        # Listen for changes in other project variables
+        project.crsChanged.connect(self.initializeVariableEditorContext)
+        project.areaUnitsChanged.connect(self.initializeVariableEditorContext)
+        project.distanceUnitsChanged.connect(self.initializeVariableEditorContext)
+        project.layersAdded.connect(self.initializeVariableEditorContext)
+        project.layersRemoved.connect(self.initializeVariableEditorContext)
+        project.ellipsoidChanged.connect(self.initializeVariableEditorContext)
+        project.fileNameChanged.connect(self.initializeVariableEditorContext)
+        project.homePathChanged.connect(self.initializeVariableEditorContext)
+        project.projectSaved.connect(self.initializeVariableEditorContext)
 
-    def applyChanges(self):
-        """Applies the changes made to the variables."""
+
+    def initializeVariableEditorContext(self):
+        """Initialize the variable editor context with the project context."""
         expressionContext = QgsExpressionContext()
-        expressionContext.appendScope(
-            QgsExpressionContextUtils.projectScope(QgsProject.instance()))
-        self.updateProjectVariables(expressionContext)
+        expressionContext.appendScope(QgsExpressionContextUtils.projectScope(QgsProject.instance()))
 
-    def applyAndClose(self):
-        """Applies the changes and closes the DockWidget."""
-        expressionContext = QgsExpressionContext()
-        expressionContext.appendScope(
-            QgsExpressionContextUtils.projectScope(QgsProject.instance()))
-        self.updateProjectVariables(expressionContext)
-        self.close()
+        # Configure the variable editor for the expression context
+        self.variable_editor_widget.setContext(expressionContext)  # Set the context in the variable editor
+        self.variable_editor_widget.reloadContext()  # Reload the context in the variable editor
+        self.variable_editor_widget.setEditableScopeIndex(0)  # Set the first scope as editable
 
-    def updateProjectVariables(self, expressionContext):
+
+    def updateProjectVariables(self):
         """Reads the variables from the active scope and updates all project variables."""
 
         # Get the variables from the active scope
@@ -120,18 +124,7 @@ class VariablePanelDockWidget(QgsDockWidget):
         # Reload the context in the variable editor to reflect the updates
         self.variable_editor_widget.reloadContext()
 
-
-    def createContext(self):
-        """Called when custom variables or metadata are changed."""
-
-        # Create a context for expressions
-        expressionContext = QgsExpressionContext()
-
-        # Add scopes to the context
-        expressionContext.appendScope(
-            QgsExpressionContextUtils.projectScope(QgsProject.instance()))  # Add the project scope
-
-        # Configure the variable editor for the expression context
-        self.variable_editor_widget.setContext(expressionContext)  # Set the context in the variable editor
-        self.variable_editor_widget.reloadContext()  # Reload the context in the variable editor
-        self.variable_editor_widget.setEditableScopeIndex(0)  # Set the first scope as editable
+    def applyChangesAndClose(self):
+        """Apply changes and close the DockWidget."""
+        self.updateProjectVariables()
+        self.close()
