@@ -5,7 +5,7 @@ The **Variable Panel** plugin for QGIS displays project variables in a dedicated
 ## Features
 
 - Visualize all variables available within the project scope.  
-- Edit, add, remove, or modify variables directly.
+- Edit, add, remove, or modify custom variables directly.
 
 
 ## Screenshot
