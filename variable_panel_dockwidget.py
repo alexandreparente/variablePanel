@@ -30,7 +30,7 @@ from qgis.PyQt.QtCore import QCoreApplication
 from qgis.PyQt.QtWidgets import QVBoxLayout, QPushButton
 
 def tr(string):
-    return QCoreApplication.translate('@default', string)
+    return QCoreApplication.translate('VariablePanel', string)
 
 class VariablePanelDockWidget(QgsDockWidget):
 

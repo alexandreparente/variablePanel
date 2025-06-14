@@ -1,7 +1,7 @@
 #/***************************************************************************
 # VariablePanel
 #
-# The VariablePanel plugin displays project variables in a dedicated QGIS panel, allowing for easy access
+# The Variable Panel plugin displays project variables in a dedicated QGIS panel, allowing for easy access
 #							 -------------------
 #		begin				: 2024-11-16
 #		git sha				: $Format:%H$
