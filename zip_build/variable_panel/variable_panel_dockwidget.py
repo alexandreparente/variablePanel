@@ -30,7 +30,7 @@ from qgis.PyQt.QtCore import QCoreApplication
 from qgis.PyQt.QtWidgets import QVBoxLayout, QPushButton
 
 def tr(string):
-    return QCoreApplication.translate('@default', string)
+    return QCoreApplication.translate('VariablePanel', string)
 
 class VariablePanelDockWidget(QgsDockWidget):
 
@@ -39,7 +39,7 @@ class VariablePanelDockWidget(QgsDockWidget):
         super(VariablePanelDockWidget, self).__init__(parent)
 
         # Set the panel title
-        self.setWindowTitle(self.tr(f"Variables Panel"))
+        self.setWindowTitle(self.tr("Variables"))
         self.setObjectName("VariablePanelDockWidget")
 
         # Create and configure the variable editor widget
