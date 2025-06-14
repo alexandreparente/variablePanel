@@ -61,7 +61,7 @@ class VariablePanel:
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr('&Variables Panel')
-        self.toolbar = self.iface.addToolBar('VariablePanel')
+        self.toolbar = self.iface.addToolBar(self.tr("Variables ToolBar"))
         self.toolbar.setObjectName('VariablePanel')
 
         self.variable_dock = None

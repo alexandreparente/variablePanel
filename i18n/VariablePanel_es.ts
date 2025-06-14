@@ -4,37 +4,35 @@
 <context>
     <name>VariablePanel</name>
     <message>
-        <location filename="../variable_panel.py" line="224"/>
         <source>&amp;Variables Panel</source>
-        <translation>&amp;Panel de Variables</translation>
+        <translation type="vanished">&amp;Panel de Variables</translation>
     </message>
     <message>
-        <location filename="../variable_panel.py" line="154"/>
         <source>Variables Panel</source>
-        <translation>Panel de Variables</translation>
+        <translation type="vanished">Panel de Variables</translation>
+    </message>
+    <message>
+        <source>Variables ToolBar</source>
+        <translation type="vanished">Barra de herramientas de variables</translation>
     </message>
 </context>
 <context>
     <name>VariablePanelDockWidget</name>
     <message>
-        <location filename="../variable_panel_dockwidget.py" line="58"/>
         <source>Apply</source>
-        <translation>Aplicar</translation>
+        <translation type="vanished">Aplicar</translation>
     </message>
     <message>
-        <location filename="../variable_panel_dockwidget.py" line="59"/>
         <source>Cancel</source>
-        <translation>Cancelar</translation>
+        <translation type="vanished">Cancelar</translation>
     </message>
     <message>
-        <location filename="../variable_panel_dockwidget.py" line="60"/>
         <source>OK</source>
-        <translation>Aceptar</translation>
+        <translation type="vanished">Aceptar</translation>
     </message>
     <message>
-        <location filename="../variable_panel_dockwidget.py" line="43"/>
-        <source>Variables Panel</source>
-        <translation>Panel de Variables</translation>
+        <source>Variables</source>
+        <translation type="vanished">Variables</translation>
     </message>
 </context>
 </TS>
