@@ -21,6 +21,7 @@ hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
  changelog=
     0.4 - Fix dock visibility when reopening VariablesPanel
+        - Add German translation
     0.3 - Updates the panel when project variables are changed
     0.2 - Minor fix
     0.1 - initial release
