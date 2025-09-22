@@ -23,108 +23,193 @@
 """
 
 from qgis.PyQt import QtWidgets
+from qgis.PyQt.QtWidgets import QVBoxLayout, QWidget, QLabel, QTreeView
 from qgis.gui import QgsDockWidget, QgsVariableEditorWidget
 from qgis.core import QgsExpressionContextUtils, QgsExpressionContext, QgsProject
 from qgis.utils import iface
-from qgis.PyQt.QtCore import QCoreApplication
-from qgis.PyQt.QtWidgets import QVBoxLayout, QPushButton
+from qgis.PyQt.QtCore import QCoreApplication, Qt
+
 
 def tr(string):
+    """Translation function."""
     return QCoreApplication.translate('VariablePanel', string)
 
+
 class VariablePanelDockWidget(QgsDockWidget):
+    """The main dock widget for the Variable Panel plugin."""
 
     def __init__(self, parent=None):
         """Constructor."""
         super(VariablePanelDockWidget, self).__init__(parent)
 
-        # Set the panel title
+        # Basic Widget Setup
         self.setWindowTitle(self.tr("Variables"))
         self.setObjectName("VariablePanelDockWidget")
 
-        # Create and configure the variable editor widget
-        mapCanvas = iface.mapCanvas()  # Get the map canvas
-        self.variable_editor_widget = QgsVariableEditorWidget()  # Create the variable editor widget
+        # State Variables
+        # Get a reference to the current QGIS project.
+        self.project = QgsProject.instance()
+        # Store the ID of the currently active layer to handle saving.
+        self.active_layer_id = None
+        # Store the name ('project' or 'layer') of the last scope the user clicked on.
+        self.last_selected_scope_name = 'project'
+        # Track the current editable scope index to avoid calling non-existent API getters.
+        self.current_editable_index = 0
 
-        #Create and configure Context
-        self.initializeVariableEditorContext()
+        # UI Layout
+        main_layout = QVBoxLayout()
+        container = QWidget()
+        container.setLayout(main_layout)
+        self.setWidget(container)
 
-        # Configure the main layout
-        layout = QVBoxLayout()  # Create a vertical layout
-        layout.addWidget(self.variable_editor_widget)  # Add the variable editor to the layout
+        # A single, unified editor widget displays all variables.
+        self.variable_editor = QgsVariableEditorWidget(self)
+        main_layout.addWidget(self.variable_editor)
 
-        # Create buttons
-        self.apply_button = QtWidgets.QPushButton(self.tr("Apply"))
-        self.cancel_button = QtWidgets.QPushButton(self.tr("Cancel"))
-        self.ok_button = QtWidgets.QPushButton(self.tr("OK"))
+        # Standard dialog buttons (OK, Cancel, Apply).
+        self.button_box = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.Ok |
+            QtWidgets.QDialogButtonBox.Cancel |
+            QtWidgets.QDialogButtonBox.Apply
+        )
+        main_layout.addWidget(self.button_box)
 
-        # Add the buttons to the layout
-        button_layout = QtWidgets.QHBoxLayout()
-        button_layout.addWidget(self.apply_button)
-        button_layout.addWidget(self.cancel_button)
-        button_layout.addWidget(self.ok_button)
+        # Signal Connections
+        self.button_box.button(QtWidgets.QDialogButtonBox.Ok).clicked.connect(self.applyChangesAndClose)
+        self.button_box.button(QtWidgets.QDialogButtonBox.Cancel).clicked.connect(self.close)
+        self.button_box.button(QtWidgets.QDialogButtonBox.Apply).clicked.connect(self.applyChanges)
 
-        # Add the button layout to the main layout
-        layout.addLayout(button_layout)
+        # Connect to the signal that fires when the active layer changes in the QGIS Layers Panel.
+        iface.layerTreeView().currentLayerChanged.connect(self.handleActiveLayerChange)
 
-        # Create the container for the widget
-        container = QtWidgets.QWidget()
-        container.setLayout(layout)  # Set the layout in the container
-        self.setWidget(container)  # Set the widget of the panel
+        # Initialize the UI with the current context.
+        self.handleActiveLayerChange(iface.activeLayer())
 
-        # Connect the Cancel button to the close function
-        self.apply_button.clicked.connect(self.updateProjectVariables)
-        self.cancel_button.clicked.connect(self.close)
-        self.ok_button.clicked.connect(self.applyChangesAndClose)
+    def onVariableItemSelected(self, current_index, previous_index):
+        """
+        Called whenever a tree item is selected. It determines which scope was clicked
+        and sets it as the target for new variables.
+        """
+        if not current_index.isValid():
+            return
 
-        # Listen for changes in custom variables and metadata
-        project = QgsProject.instance()  # Get the current QgsProject instance
-        project.customVariablesChanged.connect(self.initializeVariableEditorContext)
-        project.metadataChanged.connect(self.initializeVariableEditorContext)
+        # Find the top-level item for the clicked index by traversing up the tree.
+        top_level_index = current_index
+        while top_level_index.parent().isValid():
+            top_level_index = top_level_index.parent()
 
-        # Listen for changes in other project variables
-        project.crsChanged.connect(self.initializeVariableEditorContext)
-        project.areaUnitsChanged.connect(self.initializeVariableEditorContext)
-        project.distanceUnitsChanged.connect(self.initializeVariableEditorContext)
-        project.layersAdded.connect(self.initializeVariableEditorContext)
-        project.layersRemoved.connect(self.initializeVariableEditorContext)
-        project.ellipsoidChanged.connect(self.initializeVariableEditorContext)
-        project.fileNameChanged.connect(self.initializeVariableEditorContext)
-        project.homePathChanged.connect(self.initializeVariableEditorContext)
-        project.projectSaved.connect(self.initializeVariableEditorContext)
+        # Get the row number of the top-level item.
+        top_level_row = top_level_index.row()
 
+        # Map the row number to the correct scope name based on the current context.
+        scope_name = None
+        if self.active_layer_id:
+            # Context order is [project, layer].
+            if top_level_row == 0:
+                scope_name = 'project'
+            elif top_level_row == 1:
+                scope_name = 'layer'
+        else:
+            # Context order is just [project].
+            if top_level_row == 0:
+                scope_name = 'project'
 
-    def initializeVariableEditorContext(self):
-        """Initialize the variable editor context with the project context."""
-        expressionContext = QgsExpressionContext()
-        expressionContext.appendScope(QgsExpressionContextUtils.projectScope(QgsProject.instance()))
+        # Store the last valid scope selected by the user.
+        if scope_name:
+            self.last_selected_scope_name = scope_name
 
-        # Configure the variable editor for the expression context
-        self.variable_editor_widget.setContext(expressionContext)  # Set the context in the variable editor
-        self.variable_editor_widget.reloadContext()  # Reload the context in the variable editor
-        self.variable_editor_widget.setEditableScopeIndex(0)  # Set the first scope as editable
+        # Update the target for the '+' (add variable) button.
+        self.updateEditableScope()
 
+    def updateEditableScope(self):
+        """
+        Sets which scope (project or layer) will receive new variables.
+        This method translates the stored scope name ('project'/'layer') into the correct index.
+        """
+        target_scope = self.last_selected_scope_name
+        index_to_set = 0
 
-    def updateProjectVariables(self):
-        """Reads the variables from the active scope and updates all project variables."""
+        if self.active_layer_id:
+            # Context order is [project, layer].
+            if target_scope == 'project':
+                index_to_set = 0
+            elif target_scope == 'layer':
+                index_to_set = 1
+        else:
+            # Context order is just [project].
+            if target_scope == 'project':
+                index_to_set = 0
 
-        # Get the variables from the active scope
-        current_variables = self.variable_editor_widget.variablesInActiveScope()
+        # Tell the widget which scope is the target for additions and update our state variable.
+        self.variable_editor.setEditableScopeIndex(index_to_set)
+        self.current_editable_index = index_to_set
 
-        # Convert the variables to a dictionary for setProjectVariables
-        variablesDict = {}
-        # Iterate over the variables in the active scope
-        for var_name, var_value in current_variables.items():
-            # Add each variable and its value to the dictionary
-            variablesDict[var_name] = var_value
+    def handleActiveLayerChange(self, layer):
+        """
+        Rebuilds the editor's context based on the newly selected active layer.
+        This is the main function for updating the panel's view.
+        """
+        context = QgsExpressionContext()
+        self.active_layer_id = None
 
-        # Update all the project variables at once
-        QgsExpressionContextUtils.setProjectVariables(QgsProject.instance(), variablesDict)
+        if layer:
+            self.active_layer_id = layer.id()
+            context.appendScope(QgsExpressionContextUtils.projectScope(self.project))
+            context.appendScope(QgsExpressionContextUtils.layerScope(layer))
+            self.last_selected_scope_name = 'project'
+        else:
+            # If no layer is selected, only show the project scope.
+            context.appendScope(QgsExpressionContextUtils.projectScope(self.project))
+            self.last_selected_scope_name = 'project'
 
-        # Reload the context in the variable editor to reflect the updates
-        self.variable_editor_widget.reloadContext()
+        self.variable_editor.setContext(context)
+        # Set the default editable scope based on the new context.
+        self.updateEditableScope()
+
+        # Find the internal tree view to connect its selection signal.
+        tree_view = self.variable_editor.findChild(QTreeView)
+        if tree_view:
+            # prevents connecting the same signal multiple times.
+            try:
+                tree_view.selectionModel().currentChanged.disconnect(self.onVariableItemSelected)
+            except (TypeError, RuntimeError):
+                pass
+            # Reconnect the signal.
+            tree_view.selectionModel().currentChanged.connect(self.onVariableItemSelected)
+
+    def applyChanges(self):
+        """
+        Saves the changes for all scopes present in the context.
+        """
+        context = self.variable_editor.context()
+        if not context:
+            return
+
+        # Store the user's last selected scope index
+        original_editable_index = self.current_editable_index
+
+        # Iterate through all scopes to save.
+        for i, scope in enumerate(context.scopes()):
+            self.variable_editor.setEditableScopeIndex(i)
+            variables_dict = self.variable_editor.variablesInActiveScope()
+
+            # Identify the scope by its index.
+            is_project_scope = (self.active_layer_id and i == 0) or (not self.active_layer_id and i == 0)
+            is_layer_scope = self.active_layer_id and i == 1
+
+            if is_project_scope:
+                QgsExpressionContextUtils.setProjectVariables(self.project, variables_dict)
+            elif is_layer_scope:
+                layer = self.project.mapLayer(self.active_layer_id)
+                if layer:
+                    QgsExpressionContextUtils.setLayerVariables(layer, variables_dict)
+
+        # Restore the editable scope to the user's last selection.
+        self.variable_editor.setEditableScopeIndex(original_editable_index)
+        # Reload the context to ensure the view is synchronized with the saved data.
+        self.variable_editor.reloadContext()
 
     def applyChangesAndClose(self):
         """Apply changes and close the DockWidget."""
-        self.updateProjectVariables()
+        self.applyChanges()
         self.close()
